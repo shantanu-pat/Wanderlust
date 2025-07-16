@@ -12,7 +12,7 @@
       alt="listing_image"
     />
     <div class="card-body">
-      <p class="card-text">Owned By <i><%= listing.owner.username %></i></p>
+      <p class="car d-text">Owned By <i><%= listing.owner.username %></i></p>
     
       <p class="card-text"><%=listing.description %> </p>
      <p class="card-text">&#8377;<%=listing.price.toLocaleString("en-IN") %> </p>
@@ -22,7 +22,8 @@
     </div>
   </div>
 <br/>
-<% if(CurrUser && CurrUser._id.equals(listing.owner._id)) { %>
+
+<% if(CurrUser && listing.owner._id.equals(CurrUser._id)) {%>
   <div class="btns col-6 offset-3  mt-3 mb-2">
     <a
       href="/listings/<%=listing._id %>/edit"
@@ -38,7 +39,9 @@
   <% } %>
 
   <div class="col-8 offset-3 mb-3">
-    <hr />  
+     
+    <% if(CurrUser)  { %>
+      <hr /> 
     <h4>Leave a review</h4>
     
     <form 
@@ -47,17 +50,25 @@
       novalidate
       class="needs-validation"
     >
+  
       <div class="mb-3 mt-3">
-        <label for="rating" class="form-label">Rating</label>
-        <input
-          type="range"
-          min="1"
-          max="5"
-          id="rating"
-          name="review[rating]"
-          class="form-range"
-        />
-      </div>
+       <label for="rating" class="form-label">Rating</label>
+      <fieldset class="starability-slot">
+ 
+  <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+  <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+  <label for="first-rate1" title="Terrible">1 star</label>
+  <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+  <label for="first-rate2" title="Not good">2 stars</label>
+  <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+  <label for="first-rate3" title="Average">3 stars</label>
+  <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+  <label for="first-rate4" title="Very good">4 stars</label>
+  <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+  <label for= "first-rate5" title="Amazing">5 stars</label>
+</fieldset>
+</div>
+ 
       <div class="mb-3 mt-3">
         <label for="comment" class="form-label">Comments</label>
         <textarea
@@ -74,18 +85,22 @@
       </div>
       <button class="btn btn-outline-dark">Submit</button>
     </form>
-
     <hr />
+<% } %>
+    
 
-    <p><b>All reviews</b></p>
-    <div class="row">
+   <% if(listing.reviews.length > 0) { %>
+
+      <div class="row">
+       <p><b>All reviews</b></p>
       <% for(review of listing.reviews){%>
       <div class="card col-5 ms-3 mb-3">
         <div class="card-body">
-          <h5 class="card-title">Jane Doe</h5>
+          <h5 class="card-title">@<%= review.author.username %></h5>
+          <p class="starability-result card-text" data-rating="<%= review.rating%>">
+          </p>
           <p class="card-text"><%= review.comment%></p>
-          <p class="card-text"><%= review.rating%>stars</p>
-        </div>
+        
         <form
           class="mb-3"
           method="post"
@@ -94,8 +109,80 @@
           <button class="btn btn-sm btn-dark">Delete</button>
         </form>
       </div>
-
+ </div>
       <% } %>
+    </div>
+     <%}%> 
+  </div>
+
+</div>
+</div>
+
+
+
+ <!-- In your show.ejs file -->
+<div class="row mt-4">
+  <div class="col-md-8 offset-md-2">
+    <div class="card border-light mb-4">
+      <div class="card-body p-0">
+        <div class="d-flex justify-content-between align-items-center p-3 bg-light">
+          <h5 class="mb-0">Where you'll be</h5>
+          <div class="search-box" style="width: 200px;">
+            <input type="text" class="form-control form-control-sm" placeholder="Search area">
+          </div>
+        </div>
+        
+        <!-- Map Container - Make sure it has explicit dimensions -->
+        <div id="map" style="height: 300px; width: 100%;"></div>
+        
+        <div class="p-2 bg-light">
+          <small class="text-muted">
+            © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors
+          </small>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Load MapLibre GL CSS -->
+<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+
+<!-- Load MapLibre GL JS -->
+<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+
+<script>
+  // Make sure the container is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    // Debugging - check if container exists
+    if (!document.getElementById('map')) {
+      console.error('Map container not found!');
+      return;
+    }
+
+    // Debugging - check if token is available
+    console.log('MapTiler Token:', '<%= MAPTILER_TOKEN %>');
+
+    try {
+      const map = new maplibregl.Map({
+        container: 'map',
+        style: `https://api.maptiler.com/maps/streets/style.json?key=<%= MAPTILER_TOKEN %>`,
+        center: [77.2090, 28.6139], // Delhi coordinates as fallback
+        zoom: 12
+      });
+
+      // Add basic controls
+      map.addControl(new maplibregl.NavigationControl());
+
+      // Add a simple marker to verify the map is working
+      new maplibregl.Marker()
+        .setLngLat([77.2090, 28.6139])
+        .addTo(map);
+
+      console.log('Map initialized successfully!');
+      
+    } catch (error) {
+      console.error('Map initialization error:', error);
+    }
+  });
+</script>
