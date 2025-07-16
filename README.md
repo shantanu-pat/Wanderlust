@@ -1,10 +1,4 @@
-Perfect, Shantanu! Here's a **professional `README.md`** tailored for your **Wanderlust** project – a travel listing web app using Node.js, Express, MongoDB, and EJS.
 
----
-
-### ✅ `README.md` content:
-
-```md
 # 🌍 Wanderlust
 
 **Wanderlust** is a full-stack travel listing web application built using **Node.js**, **Express**, **MongoDB**, and **EJS** templating. It allows users to explore, create, edit, and delete travel listings, along with submitting reviews for different locations.
