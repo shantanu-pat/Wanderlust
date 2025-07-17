@@ -33,7 +33,7 @@ const initDB = async () => {
   // ✅ Assign this user as owner to all listings
   const listingsWithOwner = initData.data.map((obj) => ({
     ...obj,
-    owner: "686fabe8c33d43475536883c",
+    owner: user._id,
   }));
 
   await Listing.insertMany(listingsWithOwner);
