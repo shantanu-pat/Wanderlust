@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-require("dotenv").config({ path: "../.env" }); // ✅ path points to root
+require("dotenv").config({ path: "../.env" });
 
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
-const User = require("../models/user.js"); // ✅ Import the User model
+const User = require("../models/user.js");
 
 const dbUrl = process.env.ATLASDB_URL;
 
@@ -23,17 +23,14 @@ const initDB = async () => {
   await Listing.deleteMany({});
   await User.deleteMany({});
 
-  // ✅ Create a demo user
-  const user = new User({
-    email: "shantanu@gmail.com",
-    username: "ShantanuPatne",
-  });
-  await user.save();
+  // ✅ Register user with hashed password
+  const user = new User({ email: "shantanu@gmail.com", username: "ShantanuPatne" });
+  const registeredUser = await User.register(user, "shantanu123"); // ✅ 'shantanu123' is the password
 
-  // ✅ Assign this user as owner to all listings
+  // ✅ Use registered user's ID
   const listingsWithOwner = initData.data.map((obj) => ({
     ...obj,
-    owner: user._id,
+    owner: registeredUser._id,
   }));
 
   await Listing.insertMany(listingsWithOwner);
